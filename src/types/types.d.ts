@@ -50,7 +50,7 @@ interface AppState{
     currentUser: User | null;
 
     currentRoom: Room | null;
-    avaibleRooms: Room[];
+    availableRooms: Room[];
 
     drawEvents: DrawEvent[];
     isDrawing: boolean;
@@ -63,6 +63,6 @@ interface AppState{
     clearDrawEvents: () => void;
     setIsDrawing: (isDrawing: boolean) => void;
     resetState: () => void;
-    
+
     
 }

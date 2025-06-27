@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import { UserSetup } from './pages/Login'; 
+import { Lobby } from './pages/Lobby';
+import { Room } from './pages/Room';
+import { useUser } from './hooks/useUser';
+import { useAppStore } from './store/useAppStore';
+import './index.css';
+
+type AppState = 'setup' | 'lobby' | 'room';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [appState, setAppState] = useState<AppState>('setup');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { currentUser, loadUserFromStorage } = useUser();
+  const { currentRoom } = useAppStore();
+
+  useEffect(() => {
+    // Intentar cargar usuario existente al iniciar
+    const existingUser = loadUserFromStorage();
+    if (existingUser) {
+      setAppState('lobby');
+    }
+  }, [loadUserFromStorage]);
+
+  useEffect(() => {
+    // Cambiar a room cuando se una a una sala
+    if (currentRoom && appState !== 'room') {
+      setAppState('room');
+    }
+  }, [currentRoom, appState]);
+
+  const handleUserReady = () => {
+    setAppState('lobby');
+  };
+
+  const handleEnterRoom = () => {
+    setAppState('room');
+  };
+
+  const handleLeaveRoom = () => {
+    setAppState('lobby');
+  };
+
+  const handleLogout = () => {
+    setAppState('setup');
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-h-screen">
+      {appState === 'setup' && (
+        <UserSetup onUserReady={handleUserReady} />
+      )}
+      
+      {appState === 'lobby' && (
+        <Lobby 
+          onEnterRoom={handleEnterRoom}
+          onLogout={handleLogout}
+        />
+      )}
+      
+      {appState === 'room' && (
+        <Room onLeaveRoom={handleLeaveRoom} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;

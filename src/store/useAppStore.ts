@@ -11,7 +11,7 @@ const initialState = {
     },
     currentUser: null,
     currentRoom: null,
-    avaibleRooms: [],
+    availableRooms: [],
     drawEvents: [],
     isDrawing: false,
 }
@@ -36,7 +36,7 @@ export const useAppStore = create<AppState>()(
                 }),
 
                 setAvailableRooms: (rooms) => set((state) => {
-                    state.avaibleRooms = rooms;
+                    state.availableRooms = rooms;
                 }),
 
                 addDrawEvent: (event) => set((state) => {
