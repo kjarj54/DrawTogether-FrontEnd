@@ -1,0 +1,61 @@
+import { create } from "zustand";
+import type { AppState } from "../types/types";
+import { immer } from "zustand/middleware/immer";
+import { devtools } from "zustand/middleware";
+
+const initialState = {
+    connection: {
+        isConnected: false,
+        isConnecting: false,
+        error: null
+    },
+    currentUser: null,
+    currentRoom: null,
+    avaibleRooms: [],
+    drawEvents: [],
+    isDrawing: false,
+}
+
+
+export const useAppStore = create<AppState>()(
+    devtools(
+        immer(
+            (set) => ({
+                ...initialState,
+
+                setConnection: (connectionState) => set((state) => {
+                    Object.assign(state.connection, connectionState);
+                }),
+
+                setCurrentUser: (user) => set((state) => {
+                    state.currentUser = user;
+                }),
+
+                setCurrentRoom: (room) => set((state) => {
+                    state.currentRoom = room;
+                }),
+
+                setAvailableRooms: (rooms) => set((state) => {
+                    state.avaibleRooms = rooms;
+                }),
+
+                addDrawEvent: (event) => set((state) => {
+                    state.drawEvents.push(event);
+                }),
+
+                setIsDrawing: (isDrawing) => set((state) => {
+                    state.isDrawing = isDrawing;
+                }),
+
+                clearDrawEvents: () => set((state) => {
+                    state.drawEvents = [];
+                }),
+
+                reset: () => set(() => ({ ...initialState })),
+
+                resetState: () => set(() => ({ ...initialState })),
+            })
+        ),
+        { name: 'app-store' }
+    )
+);

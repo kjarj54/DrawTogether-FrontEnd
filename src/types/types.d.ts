@@ -43,3 +43,26 @@ export interface ConnectionState {
   isConnecting: boolean;
   error: string | null;
 }
+
+interface AppState{
+    connection: ConnectionState;
+
+    currentUser: User | null;
+
+    currentRoom: Room | null;
+    avaibleRooms: Room[];
+
+    drawEvents: DrawEvent[];
+    isDrawing: boolean;
+
+    setConnection: (state: Partial<ConnectionState>) => void;
+    setCurrentUser: (user: User | null) => void;
+    setCurrentRoom: (room: Room | null) => void;
+    setAvailableRooms: (rooms: Room[]) => void;
+    addDrawEvent: (event: DrawEvent) => void;
+    clearDrawEvents: () => void;
+    setIsDrawing: (isDrawing: boolean) => void;
+    resetState: () => void;
+    
+    
+}
