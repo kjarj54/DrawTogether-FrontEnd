@@ -161,6 +161,10 @@ export const useWebSocket = () => {
 
         const unsubscribeOpen = websocketService.onOpen(() => {
             setConnection({ isConnected: true, isConnecting: false, error: null });
+            // Automáticamente solicitar salas cuando se establece la conexión
+            setTimeout(() => {
+                sendMessage({ action: 'GET_ROOMS' });
+            }, 100);
         });
 
         const unsubscribeClose = websocketService.onClose(() => {
@@ -181,7 +185,7 @@ export const useWebSocket = () => {
             unsubscribeClose();
             unsubscribeError();
         };
-    }, [handleMessage, setConnection]);
+    }, [handleMessage, setConnection, sendMessage]);
 
     return {
         connect,

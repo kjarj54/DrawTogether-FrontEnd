@@ -37,12 +37,14 @@ export const Lobby: React.FC<LobbyProps> = ({ onEnterRoom, onLogout }) => {
   } = useWebSocket();
 
   useEffect(() => {
-    if (!connection.isConnected) {
+    // Solo conectar si no está conectado
+    if (!connection.isConnected && !connection.isConnecting) {
       connect();
     }
-  }, [connect, connection.isConnected]);
+  }, [connect, connection.isConnected, connection.isConnecting]);
 
   useEffect(() => {
+    // Obtener salas inmediatamente cuando se conecta o cuando se carga el componente
     if (connection.isConnected) {
       getRooms();
     }

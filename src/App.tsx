@@ -4,23 +4,33 @@ import { Lobby } from './pages/Lobby';
 import { Room } from './pages/Room';
 import { useUser } from './hooks/useUser';
 import { useAppStore } from './store/useAppStore';
+import { useWebSocket } from './hooks/useWebSocket';
 import './index.css';
 
 type AppState = 'setup' | 'lobby' | 'room';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('setup');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { currentUser, loadUserFromStorage } = useUser();
-  const { currentRoom } = useAppStore();
+  const { loadUserFromStorage } = useUser();
+  const { currentRoom, connection } = useAppStore();
+  const { connect, getRooms } = useWebSocket();
 
   useEffect(() => {
     // Intentar cargar usuario existente al iniciar
     const existingUser = loadUserFromStorage();
     if (existingUser) {
       setAppState('lobby');
+      // Conectar automáticamente al WebSocket cuando hay un usuario
+      connect();
     }
-  }, [loadUserFromStorage]);
+  }, [loadUserFromStorage, connect]);
+
+  // Obtener salas cuando se establece la conexión
+  useEffect(() => {
+    if (connection.isConnected && appState === 'lobby') {
+      getRooms();
+    }
+  }, [connection.isConnected, appState, getRooms]);
 
   useEffect(() => {
     // Cambiar a room cuando se una a una sala

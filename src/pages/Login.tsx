@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useUser } from '../hooks/useUser';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { DEFAULT_COLORS } from '../constants/Constants';
 
 interface UserSetupProps {
@@ -13,6 +14,7 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
   const [selectedColor, setSelectedColor] = useState(DEFAULT_COLORS[0]);
   const [error, setError] = useState('');
   const { currentUser, createUser, loadUserFromStorage, updateUserColor } = useUser();
+  const { connect } = useWebSocket();
 
   useEffect(() => {
     // Intentar cargar usuario existente
@@ -51,6 +53,10 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
         // Crear nuevo usuario
         createUser(trimmedName);
       }
+      
+      // Conectar al WebSocket automáticamente después de crear/actualizar usuario
+      connect();
+      
       onUserReady();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
