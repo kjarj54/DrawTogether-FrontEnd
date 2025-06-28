@@ -3,7 +3,7 @@ import { useDrawingStore } from '../store/useDrawingStore';
 import { useWebSocket } from './useWebSocket';
 import { useAppStore } from '../store/useAppStore';
 import { DRAW_EVENT_TYPES } from '../constants/Constants';
-import type { DrawData, DrawEvent } from '../types/types';
+import type { DrawEvent } from '../types/types';
 
 interface Point {
     x: number;
@@ -19,6 +19,7 @@ interface CanvasState {
 export const useCanvas = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+    const lastPointsByUser = useRef<Map<string, Point>>(new Map());
     const [canvasState, setCanvasState] = useState<CanvasState>({
         isDrawing: false,
         lastPoint: null,
@@ -124,17 +125,13 @@ export const useCanvas = () => {
         setIsDrawing(true);
 
         // Enviar evento STROKE_START
-        const drawData: DrawData = {
+        sendDrawEvent({
+            type: DRAW_EVENT_TYPES.STROKE_START,
             x: point.x,
             y: point.y,
             color: currentColor,
             strokeWidth,
             tool: currentTool
-        };
-
-        sendDrawEvent({
-            type: DRAW_EVENT_TYPES.STROKE_START,
-            drawData
         });
     }, [currentUser, currentRoom, currentColor, strokeWidth, currentTool, getPointFromEvent, sendDrawEvent, setIsDrawing]);
 
@@ -149,17 +146,13 @@ export const useCanvas = () => {
         drawLine(canvasState.lastPoint, currentPoint, currentColor, strokeWidth, currentTool);
 
         // Enviar evento STROKE_MOVE
-        const drawData: DrawData = {
+        sendDrawEvent({
+            type: DRAW_EVENT_TYPES.STROKE_MOVE,
             x: currentPoint.x,
             y: currentPoint.y,
             color: currentColor,
             strokeWidth,
             tool: currentTool
-        };
-
-        sendDrawEvent({
-            type: DRAW_EVENT_TYPES.STROKE_MOVE,
-            drawData
         });
 
         setCanvasState(prev => ({
@@ -185,13 +178,11 @@ export const useCanvas = () => {
         // Enviar evento STROKE_END
         sendDrawEvent({
             type: DRAW_EVENT_TYPES.STROKE_END,
-            drawData: {
-                x: 0,
-                y: 0,
-                color: currentColor,
-                strokeWidth,
-                tool: currentTool
-            }
+            x: 0,
+            y: 0,
+            color: currentColor,
+            strokeWidth,
+            tool: currentTool
         });
     }, [canvasState.isDrawing, currentUser, currentColor, strokeWidth, currentTool, sendDrawEvent, setIsDrawing]);
 
@@ -214,17 +205,43 @@ export const useCanvas = () => {
     const renderDrawEvent = useCallback((event: DrawEvent) => {
         if (!event.drawData) return;
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { drawData } = event;
+        const userId = event.userId;
 
         switch (event.type) {
             case 'STROKE_START':
-                // Marcar inicio de trazo
+                // Almacenar punto inicial para este usuario
+                lastPointsByUser.current.set(userId, { 
+                    x: drawData.x, 
+                    y: drawData.y 
+                });
                 break;
 
             case 'STROKE_MOVE':
-                // Solo renderizar si tenemos punto anterior
-                // En una implementación real necesitarías almacenar los puntos anteriores por usuario
+                {
+                    // Obtener punto anterior de este usuario
+                    const lastPoint = lastPointsByUser.current.get(userId);
+                    if (lastPoint) {
+                        const currentPoint = { x: drawData.x, y: drawData.y };
+                        
+                        // Dibujar línea desde el punto anterior al actual
+                        drawLine(
+                            lastPoint, 
+                            currentPoint, 
+                            drawData.color, 
+                            drawData.strokeWidth, 
+                            drawData.tool || 'brush'
+                        );
+                        
+                        // Actualizar punto anterior para este usuario
+                        lastPointsByUser.current.set(userId, currentPoint);
+                    }
+                    break;
+                }
+
+            case 'STROKE_END':
+                // Limpiar punto anterior para este usuario
+                lastPointsByUser.current.delete(userId);
                 break;
 
             case 'CLEAR_CANVAS':
@@ -236,10 +253,12 @@ export const useCanvas = () => {
                         context.fillStyle = '#ffffff';
                         context.fillRect(0, 0, canvas.width, canvas.height);
                     }
+                    // Limpiar todos los puntos anteriores
+                    lastPointsByUser.current.clear();
                     break;
                 }
         }
-    }, []);
+    }, [drawLine]);
 
     // Escuchar eventos de dibujo
     useEffect(() => {

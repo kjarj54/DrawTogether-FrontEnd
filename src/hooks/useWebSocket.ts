@@ -84,8 +84,17 @@ export const useWebSocket = () => {
                 break;
 
             case 'DRAW_EVENT':
-                if (message.data?.drawEvent) {
-                    addDrawEvent(message.data.drawEvent);
+                if (message.data) {
+                    // El backend envía los datos directamente en message.data
+                    const drawEvent = {
+                        id: message.data.eventId,
+                        userId: message.data.userId,
+                        type: message.data.type,
+                        timestamp: message.data.timestamp,
+                        roomId: '', // Se puede obtener del contexto si es necesario
+                        drawData: message.data.drawData
+                    };
+                    addDrawEvent(drawEvent);
                 }
                 break;
 
