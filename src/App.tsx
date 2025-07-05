@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { UserSetup } from './pages/Login'; 
 import { Lobby } from './pages/Lobby';
 import { Room } from './pages/Room';
 import { useUser } from './hooks/useUser';
 import { useAppStore } from './store/useAppStore';
 import { useWebSocket } from './hooks/useWebSocket';
-import './index.css';
 
 type AppState = 'setup' | 'lobby' | 'room';
 
@@ -56,7 +55,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {appState === 'setup' && (
         <UserSetup onUserReady={handleUserReady} />
       )}

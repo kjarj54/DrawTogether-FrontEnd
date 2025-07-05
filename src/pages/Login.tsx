@@ -72,14 +72,19 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'linear-gradient(135deg, #e0f2fe 0%, #bbdefb 100%)'}}>
-      <div className="bg-white rounded-lg shadow p-6 w-full" style={{maxWidth: '400px'}}>
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">DrawTogether</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">DrawTogether</h1>
           <p className="text-gray-600">Colabora y dibuja en tiempo real</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="Tu nombre"
             value={name}
@@ -91,7 +96,7 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
           />
 
           <div>
-            <label className="text-sm font-bold text-gray-900 mb-3" style={{display: 'block'}}>
+            <label className="block text-sm font-semibold text-gray-700 mb-4">
               Elige tu color
             </label>
             <div className="grid grid-cols-4 gap-3">
@@ -100,28 +105,14 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
                   key={color}
                   type="button"
                   onClick={() => handleColorSelect(color)}
-                  className={`rounded-full cursor-pointer`}
-                  style={{
-                    width: '48px',
-                    height: '48px',
-                    backgroundColor: color,
-                    border: selectedColor === color ? '4px solid #1a202c' : '4px solid #e2e8f0',
-                    transition: 'all 0.2s ease-in-out',
-                    transform: selectedColor === color ? 'scale(1.1)' : 'scale(1)',
-                    boxShadow: selectedColor === color ? '0 4px 6px rgba(0,0,0,0.1)' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedColor !== color) {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.borderColor = '#cbd5e0';
+                  className={`
+                    w-12 h-12 rounded-full transition-all duration-200 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-200
+                    ${selectedColor === color 
+                      ? 'ring-4 ring-gray-800 scale-110 shadow-lg' 
+                      : 'ring-2 ring-gray-200 hover:ring-gray-300 shadow-md'
                     }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedColor !== color) {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.borderColor = '#e2e8f0';
-                    }
-                  }}
+                  `}
+                  style={{ backgroundColor: color }}
                   aria-label={`Seleccionar color ${color}`}
                 />
               ))}
@@ -134,13 +125,13 @@ export const UserSetup: React.FC<UserSetupProps> = ({ onUserReady }) => {
         </form>
 
         {currentUser && (
-          <div className="bg-gray-50 rounded-lg p-4" style={{marginTop: '24px'}}>
-            <p className="text-sm text-gray-600">
-              <span className="font-bold">Usuario actual:</span> {currentUser.name}
+          <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+            <p className="text-sm text-gray-700 font-medium">
+              <span className="font-semibold">Usuario actual:</span> {currentUser.name}
             </p>
-            <div className="flex items-center" style={{marginTop: '8px'}}>
+            <div className="flex items-center mt-2">
               <div
-                className="w-4 h-4 rounded-full mr-2"
+                className="w-4 h-4 rounded-full mr-2 ring-2 ring-white shadow-sm"
                 style={{ backgroundColor: currentUser.color }}
               />
               <span className="text-sm text-gray-600">Color: {currentUser.color}</span>

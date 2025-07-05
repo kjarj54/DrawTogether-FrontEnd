@@ -59,6 +59,7 @@ interface AppState{
     setCurrentUser: (user: User | null) => void;
     setCurrentRoom: (room: Room | null) => void;
     setAvailableRooms: (rooms: Room[]) => void;
+    updateRoom: (room: Room) => void;
     addDrawEvent: (event: DrawEvent) => void;
     clearDrawEvents: () => void;
     setIsDrawing: (isDrawing: boolean) => void;

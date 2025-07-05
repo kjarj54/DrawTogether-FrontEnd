@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
     "@types/uuid": "^10.0.0",
     "immer": "^10.1.1",
     "lucide-react": "^0.523.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.11",
     "uuid": "^11.1.0",
     "zustand": "^5.0.6"
   },

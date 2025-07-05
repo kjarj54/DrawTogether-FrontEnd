@@ -9,7 +9,8 @@ export const useWebSocket = () => {
         setAvailableRooms,
         setCurrentRoom,
         addDrawEvent,
-        currentUser
+        currentUser,
+        currentRoom
     } = useAppStore();
 
     const connect = useCallback(async () => {
@@ -47,21 +48,22 @@ export const useWebSocket = () => {
                 break;
 
             case 'ROOMS_LIST':
+                if (message.data?.rooms) {
+                    setAvailableRooms(message.data.rooms);
+                    console.log('Rooms list received:', message.data.rooms.length, 'rooms');
+                }
+                break;
+
             case 'ROOMS_UPDATED':
                 if (message.data?.rooms) {
                     setAvailableRooms(message.data.rooms);
+                    console.log('Rooms updated in real-time:', message.data.rooms.length, 'rooms');
                 }
                 break;
 
             case 'ROOM_CREATED':
                 console.log('Room created successfully:', message.data);
-                if (message.data?.rooms) {
-                    setAvailableRooms(message.data.rooms);
-                }
-                // Refrescar la lista de salas
-                setTimeout(() => {
-                    sendMessage({ action: 'GET_ROOMS' });
-                }, 100);
+                // No necesitamos refrescar manualmente, el servidor envía ROOMS_UPDATED automáticamente
                 break;
 
             case 'ROOM_JOINED':
@@ -99,9 +101,35 @@ export const useWebSocket = () => {
                 break;
 
             case 'USER_JOINED':
+                console.log('User joined room:', message.data);
+                // Si estamos en la misma sala, actualizar el número de participantes
+                if (currentRoom && message.data?.roomId === currentRoom.id) {
+                    setCurrentRoom({
+                        ...currentRoom,
+                        currentParticipantsCount: currentRoom.currentParticipantsCount + 1,
+                        participants: [...currentRoom.participants, message.data.userId]
+                    });
+                }
+                break;
+
             case 'USER_LEFT':
-                // Handle user list updates
-                console.log(message.type, message.data);
+                console.log('User left room:', message.data);
+                // Si estamos en la misma sala, actualizar el número de participantes
+                if (currentRoom && message.data?.roomId === currentRoom.id) {
+                    const updatedParticipants = currentRoom.participants.filter(
+                        p => p !== message.data.userId
+                    );
+                    setCurrentRoom({
+                        ...currentRoom,
+                        currentParticipantsCount: Math.max(0, currentRoom.currentParticipantsCount - 1),
+                        participants: updatedParticipants
+                    });
+                }
+                break;
+
+            case 'ROOM_LEFT':
+                console.log('Left room successfully');
+                setCurrentRoom(null);
                 break;
 
             case 'ERROR':
@@ -112,7 +140,7 @@ export const useWebSocket = () => {
             default:
                 console.log('Unhandled message type:', message.type);
         }
-    }, [setAvailableRooms, setCurrentRoom, addDrawEvent, setConnection, sendMessage]);
+    }, [setAvailableRooms, setCurrentRoom, addDrawEvent, setConnection, currentRoom]);
 
     const createRoom = useCallback((roomName: string, maxUsers: number) => {
         sendMessage({
@@ -139,7 +167,9 @@ export const useWebSocket = () => {
         sendMessage({
             action: 'LEAVE_ROOM'
         });
-    }, [sendMessage]);
+        // Limpiar el estado local inmediatamente
+        setCurrentRoom(null);
+    }, [sendMessage, setCurrentRoom]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sendDrawEvent = useCallback((eventData: any) => {

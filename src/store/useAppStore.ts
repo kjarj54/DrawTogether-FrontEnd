@@ -39,6 +39,13 @@ export const useAppStore = create<AppState>()(
                     state.availableRooms = rooms;
                 }),
 
+                updateRoom: (updatedRoom) => set((state) => {
+                    const index = state.availableRooms.findIndex(room => room.id === updatedRoom.id);
+                    if (index !== -1) {
+                        state.availableRooms[index] = updatedRoom;
+                    }
+                }),
+
                 addDrawEvent: (event) => set((state) => {
                     state.drawEvents.push(event);
                 }),
