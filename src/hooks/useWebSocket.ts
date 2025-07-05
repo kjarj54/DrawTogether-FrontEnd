@@ -68,14 +68,23 @@ export const useWebSocket = () => {
 
             case 'ROOM_JOINED':
                 if (message.data) {
+                    console.log('ROOM_JOINED full data:', JSON.stringify(message.data, null, 2));
+                    
+                    const maxParticipants = message.data.maxParticipants;
+                    const currentParticipantsCount = message.data.currentParticipantsCount;
+                    
+                    console.log('Extracted values - maxParticipants:', maxParticipants, 'currentParticipantsCount:', currentParticipantsCount);
+                    
                     setCurrentRoom({
                         id: message.data.roomId,
                         name: message.data.roomName || '',
                         participants: message.data.participants || [],
-                        maxParticipants: message.data.maxParticipants || 0,
-                        currentParticipantsCount: message.data.participants?.length || 0,
+                        maxParticipants: Number(maxParticipants) || 2, // Default fallback to 2
+                        currentParticipantsCount: Number(currentParticipantsCount) || 0,
                         createdAt: new Date().toISOString()
                     });
+
+                    console.log('Joined room with participants:', currentParticipantsCount, 'of', maxParticipants);
 
                     // Load draw events history
                     if (message.data.drawEvents) {
@@ -101,29 +110,30 @@ export const useWebSocket = () => {
                 break;
 
             case 'USER_JOINED':
-                console.log('User joined room:', message.data);
-                // Si estamos en la misma sala, actualizar el número de participantes
+                console.log('USER_JOINED data:', message.data);
+                // Si estamos en la misma sala, actualizar participantes
                 if (currentRoom && message.data?.roomId === currentRoom.id) {
                     setCurrentRoom({
                         ...currentRoom,
-                        currentParticipantsCount: currentRoom.currentParticipantsCount + 1,
-                        participants: [...currentRoom.participants, message.data.userId]
+                        maxParticipants: Number(message.data.maxParticipants) || currentRoom.maxParticipants,
+                        currentParticipantsCount: message.data.currentParticipantsCount || 0,
+                        participants: message.data.participants || currentRoom.participants
                     });
+                    console.log('Updated participants count:', message.data.currentParticipantsCount, 'maxParticipants preserved:', currentRoom.maxParticipants);
                 }
                 break;
 
             case 'USER_LEFT':
-                console.log('User left room:', message.data);
-                // Si estamos en la misma sala, actualizar el número de participantes
+                console.log('USER_LEFT data:', message.data);
+                // Si estamos en la misma sala, actualizar participantes
                 if (currentRoom && message.data?.roomId === currentRoom.id) {
-                    const updatedParticipants = currentRoom.participants.filter(
-                        p => p !== message.data.userId
-                    );
                     setCurrentRoom({
                         ...currentRoom,
-                        currentParticipantsCount: Math.max(0, currentRoom.currentParticipantsCount - 1),
-                        participants: updatedParticipants
+                        maxParticipants: Number(message.data.maxParticipants) || currentRoom.maxParticipants,
+                        currentParticipantsCount: message.data.currentParticipantsCount || 0,
+                        participants: message.data.participants || currentRoom.participants
                     });
+                    console.log('Updated participants count after user left:', message.data.currentParticipantsCount, 'maxParticipants:', message.data.maxParticipants);
                 }
                 break;
 

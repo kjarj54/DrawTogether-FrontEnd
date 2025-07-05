@@ -13,6 +13,16 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ className 
 
   if (!currentRoom) return null;
 
+  console.log('ParticipantsPanel render:', {
+    currentParticipantsCount: currentRoom.currentParticipantsCount,
+    maxParticipants: currentRoom.maxParticipants,
+    participants: currentRoom.participants,
+    currentUserId: currentUser?.id,
+    typeOfMaxParticipants: typeof currentRoom.maxParticipants,
+    typeOfCurrentCount: typeof currentRoom.currentParticipantsCount,
+    fallbackValue: currentRoom.currentParticipantsCount || currentRoom.participants?.length || 0
+  });
+
   return (
     <div className={`bg-white/80 backdrop-blur-lg border border-white/30 rounded-2xl p-6 shadow-2xl ${className}`}>
       <div className="flex items-center mb-6">
@@ -23,7 +33,7 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ className 
           Participantes
         </h3>
         <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-          {currentRoom.currentParticipantsCount}/{currentRoom.maxParticipants}
+          {currentRoom.currentParticipantsCount || currentRoom.participants?.length || 0}/{currentRoom.maxParticipants}
         </span>
       </div>
 
@@ -31,6 +41,20 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ className 
         {currentRoom.participants.map((participantId, index) => {
           const isCurrentUser = participantId === currentUser?.id;
           const isRoomCreator = index === 0;
+          
+          // Función para generar nombres más útiles
+          const getParticipantName = (participantId: string, index: number, isCurrentUser: boolean) => {
+            if (isCurrentUser) {
+              return currentUser?.name || 'Tú';
+            }
+            
+            if (isRoomCreator) {
+              return 'Anfitrión';
+            }
+            
+            // Use participantId for unique identification if needed
+            return `Jugador ${index + 1}`;
+          };
           
           return (
             <div
@@ -66,7 +90,7 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ className 
                     <span className={`text-sm font-semibold ${
                       isCurrentUser ? 'text-blue-900' : 'text-gray-700'
                     }`}>
-                      {isCurrentUser ? currentUser?.name || 'Tú' : `Usuario ${participantId.slice(-4)}`}
+                      {getParticipantName(participantId, index, isCurrentUser)}
                     </span>
                     {isCurrentUser && (
                       <span className="ml-2 text-xs text-blue-600 font-medium">(Tú)</span>

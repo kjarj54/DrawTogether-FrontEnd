@@ -18,6 +18,21 @@ export const Room: React.FC<RoomProps> = ({ onLeaveRoom }) => {
   const { leaveRoom, disconnect } = useWebSocket();
   const { clearCanvas } = useCanvas();
 
+  // Debug logs
+  useEffect(() => {
+    if (currentRoom) {
+      console.log('Room.tsx - currentRoom updated:', {
+        name: currentRoom.name,
+        currentParticipantsCount: currentRoom.currentParticipantsCount,
+        maxParticipants: currentRoom.maxParticipants,
+        participants: currentRoom.participants,
+        participantsLength: currentRoom.participants?.length,
+        typeOfMaxParticipants: typeof currentRoom.maxParticipants,
+        typeOfCurrentCount: typeof currentRoom.currentParticipantsCount
+      });
+    }
+  }, [currentRoom]);
+
   // Redireccionar si no hay sala
   useEffect(() => {
     if (!currentRoom || !currentUser) {
@@ -80,7 +95,7 @@ export const Room: React.FC<RoomProps> = ({ onLeaveRoom }) => {
                   {currentRoom.name}
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {currentRoom.currentParticipantsCount} de {currentRoom.maxParticipants} participantes
+                  {currentRoom.currentParticipantsCount || currentRoom.participants?.length || 0}/{currentRoom.maxParticipants || 4} participantes
                 </p>
               </div>
             </div>

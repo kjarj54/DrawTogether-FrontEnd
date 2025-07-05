@@ -93,9 +93,15 @@ export const useCanvas = () => {
         const context = contextRef.current;
         if (!context) return;
 
+        // Guardar el estado actual del contexto
+        context.save();
+
         context.beginPath();
         context.moveTo(from.x, from.y);
         context.lineTo(to.x, to.y);
+        
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
 
         if (tool === 'eraser') {
             context.globalCompositeOperation = 'destination-out';
@@ -107,6 +113,9 @@ export const useCanvas = () => {
         }
 
         context.stroke();
+        
+        // Restaurar el estado del contexto
+        context.restore();
     }, []);
 
     // Comenzar a dibujar
@@ -207,6 +216,8 @@ export const useCanvas = () => {
 
         const { drawData } = event;
         const userId = event.userId;
+        
+        console.log('Received draw event:', event.type, 'tool:', drawData.tool, 'from user:', userId);
 
         switch (event.type) {
             case 'STROKE_START':
@@ -224,13 +235,18 @@ export const useCanvas = () => {
                     if (lastPoint) {
                         const currentPoint = { x: drawData.x, y: drawData.y };
                         
+                        // Asegurar que la herramienta sea válida y convertir a tipo correcto
+                        const tool: 'brush' | 'eraser' = (drawData.tool && drawData.tool === 'eraser') ? 'eraser' : 'brush';
+                        
+                        console.log('Remote draw event - tool:', drawData.tool, '-> processed as:', tool);
+                        
                         // Dibujar línea desde el punto anterior al actual
                         drawLine(
                             lastPoint, 
                             currentPoint, 
                             drawData.color, 
                             drawData.strokeWidth, 
-                            drawData.tool || 'brush'
+                            tool
                         );
                         
                         // Actualizar punto anterior para este usuario
