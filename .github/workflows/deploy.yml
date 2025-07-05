@@ -34,21 +34,20 @@ jobs:
         uses: actions/configure-pages@v4
         
       - name: Install dependencies
-        working-directory: ./drawtogether-frontend
         run: |
-          # Verifica que package.json existe
+          # Verifica estructura del repositorio
+          echo "Contenido del directorio actual:"
           ls -la
           # Instala dependencias
           npm install
           
       - name: Build
-        working-directory: ./drawtogether-frontend
         run: npm run build
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './drawtogether-frontend/dist'
+          path: './dist'
 
   # Deployment job
   deploy:
