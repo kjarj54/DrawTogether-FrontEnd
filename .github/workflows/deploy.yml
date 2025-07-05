@@ -43,6 +43,20 @@ jobs:
           
       - name: Build
         run: npm run build
+        env:
+          NODE_ENV: production
+          
+      - name: Verify build output
+        run: |
+          echo "Contenido del directorio dist:"
+          ls -la dist/
+          echo "Verificando index.html:"
+          if [ -f "dist/index.html" ]; then
+            echo "✅ index.html encontrado"
+            head -10 dist/index.html
+          else
+            echo "❌ index.html NO encontrado"
+          fi
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
