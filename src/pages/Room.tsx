@@ -14,8 +14,7 @@ interface RoomProps {
 
 export const Room: React.FC<RoomProps> = ({ onLeaveRoom }) => {
   const { currentRoom, currentUser, connection } = useAppStore();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { leaveRoom, disconnect } = useWebSocket();
+  const { leaveRoom } = useWebSocket();
   const { clearCanvas } = useCanvas();
 
   // Debug logs

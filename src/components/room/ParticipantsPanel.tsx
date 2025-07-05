@@ -43,7 +43,7 @@ export const ParticipantsPanel: React.FC<ParticipantsPanelProps> = ({ className 
           const isRoomCreator = index === 0;
           
           // Función para generar nombres más útiles
-          const getParticipantName = (participantId: string, index: number, isCurrentUser: boolean) => {
+          const getParticipantName = (_participantId: string, index: number, isCurrentUser: boolean) => {
             if (isCurrentUser) {
               return currentUser?.name || 'Tú';
             }
