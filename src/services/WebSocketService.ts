@@ -119,4 +119,4 @@ export class WebSocketService {
 }
 
 
-export const websocketService = new WebSocketService('ws://localhost:8080')
+export const websocketService = new WebSocketService('https://drawtogether-backend.onrender.com')
